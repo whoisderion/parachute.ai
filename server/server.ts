@@ -2,14 +2,18 @@ require('dotenv').config()
 import express, { Request, response, Response } from 'express'
 //import OpenAI from 'openai-api'
 import { Configuration, OpenAIApi } from "openai"
-import dotenv from 'dotenv'
+import * as dotenv from 'dotenv'
 import axios from 'axios'
 import fs from 'fs'
+import path from "path"
+import FormData from "form-data"
+
+dotenv.config({ path: __dirname + '/.env' })
 
 const app = express()
 
-const OpenaiApiKey = "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"
-const OpenaiOrgID = "org-PRuztropUTgrHaRBj8thsiy0"
+const OpenaiApiKey = process.env.OPENAI_API_KEY
+const OpenaiOrgID = process.env.OPENAI_ORG_ID
 
 const OpenaiConfiguration = new Configuration({
     apiKey: OpenaiApiKey,
@@ -26,35 +30,38 @@ app.get('/', (req: Request, res: Response) => {
     return res.send('Hello world')
 })
 
+app.get('vonage/test', async (req: Request, res: Response) => {
+
+})
+
+app.post('vonage/answer', (req: Request, res: Response) => {
+
+})
+
+app.post('vonage/event', (req: Request, res: Response) => {
+
+})
+
+app.post('vonage/fallback', (req: Request, res: Response) => {
+
+})
+
 app.get('/openai/test', async (req: Request, res: Response) => {
     const response = await openai.listModels();
     res.send(response.data)
 })
 
-app.get('/openai/transcribe', (req: Request, res: Response) => {
-    const recording: string = 'server/recordings/2022_08_03_10_19AM.mp3'
+app.get('/openai/transcribe', async (req: Request, res: Response) => {
     const model: string = 'whisper-1'
     const prompt: string = 'The transcript is from a customer calling a moving company with a salesman named Dave.'
-    axios.post('https://api.openai.com/v1/audio/transcriptions', {
-        'file': recording,
-        'model': 'whisper-1',
-        'prompt': prompt,
-    }, {
-        headers: {
-            'Authorization': `Bearer ${OpenaiApiKey}`,
-            'OpenAI-Organization': 'org-PRuztropUTgrHaRBj8thsiy0'
 
-        }
-    })
-        .then(response => {
-            fs.appendFile('server/output/whisperOutput.txt', JSON.stringify(response), (err) => {
-                console.log('transcription successful for ', recording)
-            })
-            res.send(response.data)
-        })
-        .catch(error => {
-            res.send(error)
-        })
+    const filePath = path.join(__dirname, "/recordings/2022_08_03_10_19AM.mp3")
+
+    const response = await openai.createTranscription(
+        fs.createReadStream(filePath) as any,
+        "whisper-1"
+    );
+    res.send(response.data)
 })
 
 app.listen(4444, () => {
