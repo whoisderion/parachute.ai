@@ -51,6 +51,8 @@ app.get('/openai/test', async (req: Request, res: Response) => {
     res.send(response.data)
 })
 
+let transcription = ""
+
 app.get('/openai/transcribe', async (req: Request, res: Response) => {
     const model: string = 'whisper-1'
     const prompt: string = 'The transcript is from a customer calling a moving company with a salesman named Dave.'
@@ -61,9 +63,24 @@ app.get('/openai/transcribe', async (req: Request, res: Response) => {
         fs.createReadStream(filePath) as any,
         "whisper-1"
     );
-    res.send(response.data)
+    transcription = response.data.text
+    res.send(response.data.text)
 })
 
-app.listen(4444, () => {
-    console.log(`Application listening at http://127.0.0.1:4444/`)
+app.get('/openai/analyze', async (req: Request, res: Response) => {
+    const model: string = 'gpt-3.5-turbo';
+    const prompt: string = 'What happened in the following call transcription? what is the sentiment of the caller? if the sentiment is generally negative end your response with a "<Negative>". what mistake if any was made by a worker?' + transcription;
+    const completion = await openai.createChatCompletion({
+        model: model,
+        messages: [{
+            role: "user",
+            content: prompt
+        }],
+        n: 4
+    })
+    res.send(completion.data.choices)
+})
+
+app.listen(8080, () => {
+    console.log(`Application listening at http://127.0.0.1:8080/`)
 })
