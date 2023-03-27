@@ -36,22 +36,6 @@ app.get('/', (req: Request, res: Response) => {
     return res.send('Hello world')
 })
 
-app.get('vonage/test', async (req: Request, res: Response) => {
-
-})
-
-app.post('vonage/answer', (req: Request, res: Response) => {
-
-})
-
-app.post('vonage/event', (req: Request, res: Response) => {
-
-})
-
-app.post('vonage/fallback', (req: Request, res: Response) => {
-
-})
-
 app.get('/openai/test', async (req: Request, res: Response) => {
     const response = await openai.listModels();
     res.send(response.data)
