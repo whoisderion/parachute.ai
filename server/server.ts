@@ -7,7 +7,12 @@ import axios from 'axios'
 import fs from 'fs'
 import path from "path"
 import FormData from "form-data"
+import cors from 'cors'
 
+const corsOptions = {
+    origin: ['http://127.0.0.1:8080', 'https://api.openai.com'],
+    methods: ['POST', 'GET']
+}
 dotenv.config({ path: __dirname + '/.env' })
 
 const app = express()
@@ -21,7 +26,8 @@ const OpenaiConfiguration = new Configuration({
 
 const openai = new OpenAIApi(OpenaiConfiguration)
 
-
+app.set('json spaces', 4)
+app.use(cors(corsOptions))
 app.use(express.json())
 // only for parsing url encoded bodies
 // app.use(express.urlencoded({ extended: true }))
