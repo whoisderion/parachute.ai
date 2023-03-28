@@ -8,7 +8,7 @@ function App() {
         <h3>Upload a recording</h3>
         <button>Upload</button>
       </div>
-      <div className='options'>
+      <div className='options mt-4'>
         <div className='summary block'>
           <p className='inline-flex mr-2'>Summary</p>
           <input type="checkbox" />
@@ -22,9 +22,16 @@ function App() {
           <input type="checkbox" />
         </div>
       </div>
-      <div className='response mt-10'>
-        <h3>Response</h3>
-        <div className='openAI-response w-96 h-32 border-2 border-slate-200'>
+      <div className='result inline-flex mt-10'>
+        <div className='transcript mr-4'>
+          <h3>Transcript</h3>
+          <div className='openAI-response w-96 h-44 p-4 border-2 border-slate-200'>
+          </div>
+        </div>
+        <div className='response ml-4'>
+          <h3>Response</h3>
+          <div className='openAI-response w-96 h-44 p-4 border-2 border-slate-200'>
+          </div>
         </div>
       </div>
     </div>
