@@ -4,10 +4,12 @@ import axios from 'axios'
 
 function App() {
 
+  const [fileName, setFileName] = useState('')
   const [summary, setSummary] = useState(false)
   const [sentiment, setSentiment] = useState(false)
   const [flag, setFlag] = useState(false)
-  const [fileName, setFileName] = useState('')
+  const [callerQuestion, setCallerQuestion] = useState(false)
+  const [employeeQuestion, setEmployeeQuestion] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [response, setResponse] = useState('')
 
@@ -23,10 +25,22 @@ function App() {
     setFlag(!flag)
   }
 
+  const toggleCallerQuestion = () => {
+    setCallerQuestion(!callerQuestion)
+  }
+
+  const toggleEmployeeQuestion = () => {
+    setEmployeeQuestion(!employeeQuestion)
+  }
+
   const handleSubmit = async () => {
     await getTranscript()
     await getAnalysis()
 
+  }
+
+  type GetTextResponse = {
+    data: '';
   }
 
   const getTranscript = () => {
@@ -40,13 +54,19 @@ function App() {
     if (flag) {
       prompt = prompt + 'If the sentiment is generally negative end your response with a "<Negative>", otherwise end your response with a "<Not Negative>".'
     }
+    if (callerQuestion) {
+      prompt = prompt + 'What questions did the caller ask the employee?'
+    }
+    if (employeeQuestion) {
+      prompt = prompt + 'What questions did the employee ask the caller?'
+    }
 
-    axios.get('http://127.0.0.1:8080/openai/transcribe', { data: { data: prompt } })
+    axios.get<GetTextResponse>('http://127.0.0.1:8080/openai/transcribe', { data: { data: prompt } })
       .then(res => setTranscript(res))
   }
 
   const getAnalysis = () => {
-    axios.get('http://127.0.0.1:8080/openai/analyze', { data: { transcript: transcript } })
+    axios.get<GetTextResponse>('http://127.0.0.1:8080/openai/analyze', { data: { transcript: transcript } })
       .then(res => setResponse(res))
   }
 
@@ -69,6 +89,14 @@ function App() {
         <div className='flag block'>
           <p className='inline-flex mr-2'>Flag {`${flag}`}</p>
           <input type="checkbox" onChange={toggleFlag} />
+        </div>
+        <div className='customer-question block'>
+          <p className='inline-flex mr-2'>Caller Question {`${callerQuestion}`}</p>
+          <input type="checkbox" onChange={toggleCallerQuestion} />
+        </div>
+        <div className='customer-question block'>
+          <p className='inline-flex mr-2'>Employee Question {`${employeeQuestion}`}</p>
+          <input type="checkbox" onChange={toggleEmployeeQuestion} />
         </div>
         <button className='mt-4' onClick={handleSubmit}>Submit for analysis</button>
       </div>
