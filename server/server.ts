@@ -1,30 +1,33 @@
 require('dotenv').config()
-import express, { Request, response, Response } from 'express'
-//import OpenAI from 'openai-api'
+import express, { Request, Response } from 'express'
 import { Configuration, OpenAIApi } from "openai"
 import * as dotenv from 'dotenv'
-import axios from 'axios'
 import fs from 'fs'
 import path from "path"
-import FormData from "form-data"
 import cors from 'cors'
+import { PrismaClient } from '@prisma/client'
+
+// import OpenAI from 'openai-api'
+// import FormData from "form-data"
+// import axios from 'axios'
 
 const corsOptions = {
     origin: ['http://127.0.0.1:8080', 'https://api.openai.com'],
     methods: ['POST', 'GET']
 }
-dotenv.config({ path: __dirname + '/.env' })
+dotenv.config({ path: __dirname + '/.env' });
 
 const app = express()
 
 const OpenaiApiKey = process.env.OPENAI_API_KEY
-const OpenaiOrgID = process.env.OPENAI_ORG_ID
 
 const OpenaiConfiguration = new Configuration({
     apiKey: OpenaiApiKey,
 });
 
-const openai = new OpenAIApi(OpenaiConfiguration)
+const openai = new OpenAIApi(OpenaiConfiguration);
+
+const prisma = new PrismaClient();
 
 app.set('json spaces', 4)
 app.use(cors(corsOptions))
@@ -42,6 +45,27 @@ app.get('/openai/test', async (req: Request, res: Response) => {
 })
 
 let transcription = ""
+
+app.post('/upload', async (req: Request, res: Response) => {
+
+})
+
+app.get('/:file_name', async (req: Request, res: Response) => {
+    const fileName = req.params.file_name
+    const file = await prisma.recording.findFirst({
+        where: { name: fileName }
+    })
+})
+
+app.delete('/:file_name', async (req: Request, res: Response) => {
+    const fileName = req.params.file_name
+    const id = await prisma.recording.findFirst({
+        where: { name: fileName }
+    })
+    await prisma.recording.delete({
+        where: { id: id?.id }
+    })
+})
 
 app.get('/openai/transcribe', async (req: Request, res: Response) => {
     const model: string = 'whisper-1'
