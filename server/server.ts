@@ -6,6 +6,7 @@ import fs from 'fs'
 import path from "path"
 import cors from 'cors'
 import { PrismaClient } from '@prisma/client'
+import multer, { diskStorage } from 'multer'
 
 // import OpenAI from 'openai-api'
 // import FormData from "form-data"
@@ -29,6 +30,17 @@ const openai = new OpenAIApi(OpenaiConfiguration);
 
 const prisma = new PrismaClient();
 
+const upload = multer({
+    storage: diskStorage({
+        destination: (req, file, callback) => {
+            callback(null, 'Recs')
+        },
+        filename: (req, file, callback) => {
+            callback(null, String(Date.now()) + path.extname(file.originalname))
+        }
+    })
+})
+
 app.set('json spaces', 4)
 app.use(cors(corsOptions))
 app.use(express.json())
@@ -46,8 +58,8 @@ app.get('/openai/test', async (req: Request, res: Response) => {
 
 let transcription = ""
 
-app.post('/upload', async (req: Request, res: Response) => {
-
+app.post('/upload', upload.single("audio"), async (req: Request, res: Response) => {
+    res.sendStatus(200)
 })
 
 app.get('/:file_name', async (req: Request, res: Response) => {
