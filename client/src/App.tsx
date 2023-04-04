@@ -75,6 +75,10 @@ function App() {
       <div className='upload-file'>
         <h3>Upload a recording</h3>
         <p>File: {`${fileName}`}</p>
+        <form encType='multipart/form-data'>
+          <input type="file" name="audio"></input>
+          <input type='submit'>Submit</input>
+        </form>
         <button>Upload</button>
       </div>
       <div className='options mt-4'>
