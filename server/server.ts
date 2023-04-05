@@ -13,7 +13,7 @@ import multer, { diskStorage } from 'multer'
 // import axios from 'axios'
 
 const corsOptions = {
-    origin: ['http://127.0.0.1:8080', 'https://api.openai.com'],
+    origin: ['http://127.0.0.1:5173', 'https://api.openai.com'],
     methods: ['POST', 'GET']
 }
 dotenv.config({ path: __dirname + '/.env' });
