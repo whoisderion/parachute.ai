@@ -70,25 +70,14 @@ function App() {
       .then(res => setResponse(res))
   }
 
-  const uploadFile = () => {
-    const formData = new FormData()
-    formData.append("image", file)
-    console.log(formData)
-    axios.post("http://127.0.0.1:8080/upload", formData)
-      .then(response => {
-        console.log(response)
-        alert(response.data.message)
-      })
-  }
-
   return (
     <div className="App">
       <div className='upload-file'>
         <h3>Upload a recording</h3>
         <p>File: {`${fileName}`}</p>
-        <form action="http://127.0.0.1:8080/upload" method='post' encType='multipart/form-data'>
+        <form method='POST' action="http://127.0.0.1:8080/upload" encType='multipart/form-data'>
           <input type="file" name="audio"></input>
-          <button onClick={uploadFile}>Submit</button>
+          <input type='submit'></input>
         </form>
       </div>
       <div className='options mt-4'>

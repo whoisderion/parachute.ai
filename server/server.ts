@@ -31,11 +31,12 @@ const openai = new OpenAIApi(OpenaiConfiguration);
 const prisma = new PrismaClient();
 
 const upload = multer({
-    storage: diskStorage({
+    storage: multer.diskStorage({
         destination: (req, file, callback) => {
-            callback(null, 'Recs')
+            callback(null, 'server/Recs')
         },
         filename: (req, file, callback) => {
+            console.log(file)
             callback(null, String(Date.now()) + path.extname(file.originalname))
         }
     })
