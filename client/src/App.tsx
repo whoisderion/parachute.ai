@@ -62,12 +62,16 @@ function App() {
     }
 
     axios.get<GetTextResponse>('http://127.0.0.1:8080/openai/transcribe', { data: { data: prompt } })
-      .then(res => setTranscript(res))
+      .then(res => {
+        setTranscript(String(res.data))
+      })
   }
 
   const getAnalysis = () => {
     axios.get<GetTextResponse>('http://127.0.0.1:8080/openai/analyze', { data: { transcript: transcript } })
-      .then(res => setResponse(res))
+      .then(res => {
+        setResponse(String(res.data[0].message.content))
+      })
   }
 
   return (
