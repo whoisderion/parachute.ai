@@ -9,6 +9,7 @@ import { PrismaClient } from '@prisma/client'
 import multer, { diskStorage } from 'multer'
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
+import url from 'url'
 
 // import OpenAI from 'openai-api'
 // import FormData from "form-data"
@@ -62,8 +63,19 @@ app.get('/', (req: Request, res: Response) => {
 
 let transcription = ""
 
-app.post('/upload', upload.single("audio"), (req: Request, res: Response) => {
-    return res.json({ audio: req.file.path });
+app.post('/upload', upload.single("audio"), async (req: Request, res: Response) => {
+    const cloudinaryURL: string = String(req?.file?.path)
+    const cloudinaryID: string = path.parse(cloudinaryURL).name
+    const recording = await prisma.recording.create({
+        data: {
+            cloudinaryID: cloudinaryID,
+            cloudinaryURL: cloudinaryURL,
+            name: 'test file',
+            userId: 'clgcqxt3h0000ztfqy7wjmzpf',
+        }
+    })
+    console.log(recording)
+    return res.json({ audio: cloudinaryURL });
 })
 
 app.get('/:file_name', async (req: Request, res: Response) => {
@@ -79,7 +91,7 @@ app.delete('/:file_name', async (req: Request, res: Response) => {
         where: { name: fileName }
     })
     await prisma.recording.delete({
-        where: { id: id?.id }
+        where: { cloudinaryID: id?.cloudinaryID }
     })
 })
 
