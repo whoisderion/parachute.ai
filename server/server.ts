@@ -8,11 +8,11 @@ import cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import multer, { diskStorage } from 'multer'
 const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 // import OpenAI from 'openai-api'
 // import FormData from "form-data"
 // import axios from 'axios'
-
 const corsOptions = {
     origin: ['http://127.0.0.1:5173', 'https://api.openai.com'],
     methods: ['POST', 'GET']
@@ -20,28 +20,15 @@ const corsOptions = {
 dotenv.config({ path: __dirname + '/.env' });
 
 const app = express()
+app.set('json spaces', 4)
+app.use(cors(corsOptions))
+app.use(express.json())
 
 const OpenaiApiKey = process.env.OPENAI_API_KEY
-
-const OpenaiConfiguration = new Configuration({
-    apiKey: OpenaiApiKey,
-});
-
+const OpenaiConfiguration = new Configuration({ apiKey: OpenaiApiKey });
 const openai = new OpenAIApi(OpenaiConfiguration);
 
 const prisma = new PrismaClient();
-
-const upload = multer({
-    storage: multer.diskStorage({
-        destination: (req, file, callback) => {
-            callback(null, 'server/Recs')
-        },
-        filename: (req, file, callback) => {
-            console.log(file)
-            callback(null, String(Date.now()) + path.extname(file.originalname))
-        }
-    })
-})
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -49,25 +36,34 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-app.set('json spaces', 4)
-app.use(cors(corsOptions))
-app.use(express.json())
-// only for parsing url encoded bodies
-// app.use(express.urlencoded({ extended: true }))
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'parachute/recordings',
+        resource_type: 'auto'
+    },
+});
+
+//  storage: multer.diskStorage({
+//     destination: (req, file, callback) => {
+//         callback(null, 'server/Recs')
+//     },
+//     filename: (req, file, callback) => {
+//         console.log(file)
+//         callback(null, String(Date.now()) + path.extname(file.originalname))
+//     }
+// })
+
+const upload = multer({ storage: storage })
 
 app.get('/', (req: Request, res: Response) => {
     return res.send('Hello world')
 })
 
-app.get('/openai/test', async (req: Request, res: Response) => {
-    const response = await openai.listModels();
-    res.send(response.data)
-})
-
 let transcription = ""
 
-app.post('/upload', upload.single("audio"), async (req: Request, res: Response) => {
-    res.sendStatus(200)
+app.post('/upload', upload.single("audio"), (req: Request, res: Response) => {
+    return res.json({ audio: req.file.path });
 })
 
 app.get('/:file_name', async (req: Request, res: Response) => {
@@ -85,6 +81,11 @@ app.delete('/:file_name', async (req: Request, res: Response) => {
     await prisma.recording.delete({
         where: { id: id?.id }
     })
+})
+
+app.get('/openai/test', async (req: Request, res: Response) => {
+    const response = await openai.listModels();
+    res.send(response.data)
 })
 
 app.get('/openai/transcribe', async (req: Request, res: Response) => {
