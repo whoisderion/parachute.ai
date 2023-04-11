@@ -7,6 +7,7 @@ import path from "path"
 import cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import multer, { diskStorage } from 'multer'
+const cloudinary = require('cloudinary').v2;
 
 // import OpenAI from 'openai-api'
 // import FormData from "form-data"
@@ -41,6 +42,12 @@ const upload = multer({
         }
     })
 })
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 app.set('json spaces', 4)
 app.use(cors(corsOptions))
