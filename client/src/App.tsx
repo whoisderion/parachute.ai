@@ -83,11 +83,8 @@ function App() {
       <div className='upload-file'>
         <h3>Upload a recording</h3>
         <p>File: {`${fileName}`}</p>
-        <form method='POST' action="http://127.0.0.1:8080/upload" encType='multipart/form-data'>
+        <form method='post' action="http://127.0.0.1:8080/upload" encType='multipart/form-data' onSubmit={handleSubmit} >
           <input type="file" name="audio"></input>
-          <input type='submit'></input>
-        </form>
-      </div>
           <div className='options mt-4'>
             <div className='summary block'>
               <p className='inline-flex mr-2'>Summary {`${summary}`}</p>
@@ -109,7 +106,10 @@ function App() {
               <p className='inline-flex mr-2'>Employee Question {`${employeeQuestion}`}</p>
               <input type="checkbox" onChange={toggleEmployeeQuestion} />
             </div>
-        <button className='mt-4' onClick={handleSubmit}>Submit for analysis</button>
+            {/* <button className='mt-4' onClick={handleSubmit}>Submit for analysis</button> */}
+            <button><input type='submit' value="Submit for analysis"></input></button>
+          </div>
+        </form>
       </div>
       <div className='result inline-flex mt-10'>
         <div className='transcript mr-4'>
