@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import axios from 'axios'
+// import { UserAuth, AuthContextProvider } from "./AuthContext";
 
 function App() {
 
@@ -33,17 +34,18 @@ function App() {
     setEmployeeQuestion(!employeeQuestion)
   }
 
-  const handleSubmit = async () => {
-    await getTranscript()
-    await getAnalysis()
-
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    getTranscript()
   }
 
   type GetTextResponse = {
     data: '';
   }
 
-  const getTranscript = () => {
+  const getTranscript = async () => {
+    setTranscript('')
+    setResponse('')
     let prompt = ''
     if (summary) {
       prompt = prompt + 'What happened in the following call transcription?'
@@ -61,14 +63,16 @@ function App() {
       prompt = prompt + 'What questions did the employee ask the caller?'
     }
 
-    axios.get<GetTextResponse>('http://127.0.0.1:8080/openai/transcribe', { data: { data: prompt } })
+    await axios.get<GetTextResponse>('http://127.0.0.1:8080/openai/transcribe', { data: { data: prompt } })
       .then(res => {
         setTranscript(String(res.data))
+      }).then(res => {
+        getAnalysis()
       })
   }
 
-  const getAnalysis = () => {
-    axios.get<GetTextResponse>('http://127.0.0.1:8080/openai/analyze', { data: { transcript: transcript } })
+  const getAnalysis = async () => {
+    await axios.get<GetTextResponse>('http://127.0.0.1:8080/openai/analyze', { data: { transcript: transcript } })
       .then(res => {
         setResponse(String(res.data[0].message.content))
       })
@@ -84,27 +88,27 @@ function App() {
           <input type='submit'></input>
         </form>
       </div>
-      <div className='options mt-4'>
-        <div className='summary block'>
-          <p className='inline-flex mr-2'>Summary {`${summary}`}</p>
-          <input type="checkbox" onChange={toggleSummary} />
-        </div>
-        <div className='sentiment block'>
-          <p className='inline-flex mr-2'>Sentiment {`${sentiment}`}</p>
-          <input type="checkbox" onChange={toggleSentiment} />
-        </div>
-        <div className='flag block'>
-          <p className='inline-flex mr-2'>Flag {`${flag}`}</p>
-          <input type="checkbox" onChange={toggleFlag} />
-        </div>
-        <div className='customer-question block'>
-          <p className='inline-flex mr-2'>Caller Question {`${callerQuestion}`}</p>
-          <input type="checkbox" onChange={toggleCallerQuestion} />
-        </div>
-        <div className='customer-question block'>
-          <p className='inline-flex mr-2'>Employee Question {`${employeeQuestion}`}</p>
-          <input type="checkbox" onChange={toggleEmployeeQuestion} />
-        </div>
+          <div className='options mt-4'>
+            <div className='summary block'>
+              <p className='inline-flex mr-2'>Summary {`${summary}`}</p>
+              <input type="checkbox" onChange={toggleSummary} />
+            </div>
+            <div className='sentiment block'>
+              <p className='inline-flex mr-2'>Sentiment {`${sentiment}`}</p>
+              <input type="checkbox" onChange={toggleSentiment} />
+            </div>
+            <div className='flag block'>
+              <p className='inline-flex mr-2'>Flag {`${flag}`}</p>
+              <input type="checkbox" onChange={toggleFlag} />
+            </div>
+            <div className='customer-question block'>
+              <p className='inline-flex mr-2'>Caller Question {`${callerQuestion}`}</p>
+              <input type="checkbox" onChange={toggleCallerQuestion} />
+            </div>
+            <div className='customer-question block'>
+              <p className='inline-flex mr-2'>Employee Question {`${employeeQuestion}`}</p>
+              <input type="checkbox" onChange={toggleEmployeeQuestion} />
+            </div>
         <button className='mt-4' onClick={handleSubmit}>Submit for analysis</button>
       </div>
       <div className='result inline-flex mt-10'>
