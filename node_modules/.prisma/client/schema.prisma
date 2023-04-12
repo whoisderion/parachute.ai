@@ -12,27 +12,34 @@ datasource db {
 
 // files
 model Recording {
-  id      String @id @default(cuid())
-  name    String
-  creator User   @relation(fields: [userId], references: [id])
-  userId  String
+  cloudinaryID  String      @id @default(cuid())
+  cloudinaryURL String
+  name          String?
+  creator       User        @relation(fields: [userId], references: [id])
+  userId        String
+  analysis      Analysis?   @relation(fields: [analysisId], references: [id])
+  analysisId    String?
+  transcript    Transcript? @relation(fields: [transcriptId], references: [id])
+  transcriptId  String?
 }
 
 // analysis
 model Analysis {
-  id                String  @id @default(cuid())
+  id                String      @id @default(cuid())
   text              String
   summary           Boolean
   sentiment         Boolean
   flag              Boolean
   caller_question   Boolean
   employee_question Boolean
+  Recording         Recording[]
 }
 
 // transcripts
 model Transcript {
-  id   String @id @default(cuid())
-  text String
+  id        String      @id @default(cuid())
+  text      String
+  Recording Recording[]
 }
 
 // users

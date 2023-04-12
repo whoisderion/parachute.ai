@@ -79,6 +79,7 @@ function App() {
   }
 
   return (
+    //<AuthContextProvider>
     <div className="App">
       <div className='upload-file'>
         <h3>Upload a recording</h3>
@@ -87,23 +88,23 @@ function App() {
           <input type="file" name="audio"></input>
           <div className='options mt-4'>
             <div className='summary block'>
-              <p className='inline-flex mr-2'>Summary {`${summary}`}</p>
+              <p className='inline-flex mr-2'>Summary</p>
               <input type="checkbox" onChange={toggleSummary} />
             </div>
             <div className='sentiment block'>
-              <p className='inline-flex mr-2'>Sentiment {`${sentiment}`}</p>
+              <p className='inline-flex mr-2'>Sentiment</p>
               <input type="checkbox" onChange={toggleSentiment} />
             </div>
             <div className='flag block'>
-              <p className='inline-flex mr-2'>Flag {`${flag}`}</p>
+              <p className='inline-flex mr-2'>Flag</p>
               <input type="checkbox" onChange={toggleFlag} />
             </div>
             <div className='customer-question block'>
-              <p className='inline-flex mr-2'>Caller Question {`${callerQuestion}`}</p>
+              <p className='inline-flex mr-2'>Caller Question</p>
               <input type="checkbox" onChange={toggleCallerQuestion} />
             </div>
             <div className='customer-question block'>
-              <p className='inline-flex mr-2'>Employee Question {`${employeeQuestion}`}</p>
+              <p className='inline-flex mr-2'>Employee Question</p>
               <input type="checkbox" onChange={toggleEmployeeQuestion} />
             </div>
             {/* <button className='mt-4' onClick={handleSubmit}>Submit for analysis</button> */}
@@ -126,6 +127,7 @@ function App() {
         </div>
       </div>
     </div>
+    //</AuthContextProvider>
   )
 }
 
