@@ -9,11 +9,15 @@ import { PrismaClient } from '@prisma/client'
 import multer, { diskStorage } from 'multer'
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
-import url from 'url'
+const https = require('https');
+import axios from 'axios'
+import { Stream } from 'stream'
+const request = require('request');
 
+// import url from 'url'
 // import OpenAI from 'openai-api'
 // import FormData from "form-data"
-// import axios from 'axios'
+
 const corsOptions = {
     origin: ['http://127.0.0.1:5173', 'https://api.openai.com'],
     methods: ['POST', 'GET']
@@ -45,23 +49,13 @@ const storage = new CloudinaryStorage({
     },
 });
 
-//  storage: multer.diskStorage({
-//     destination: (req, file, callback) => {
-//         callback(null, 'server/Recs')
-//     },
-//     filename: (req, file, callback) => {
-//         console.log(file)
-//         callback(null, String(Date.now()) + path.extname(file.originalname))
-//     }
-// })
-
 const upload = multer({ storage: storage })
 
 app.get('/', (req: Request, res: Response) => {
     return res.send('Hello world')
 })
 
-let transcription = ""
+let transcription: string = ""
 
 app.post('/upload', upload.single("audio"), async (req: Request, res: Response) => {
     const cloudinaryURL: string = String(req?.file?.path)
@@ -78,14 +72,15 @@ app.post('/upload', upload.single("audio"), async (req: Request, res: Response) 
     return res.json({ audio: cloudinaryURL });
 })
 
-app.get('/:file_name', async (req: Request, res: Response) => {
-    const fileName = req.params.file_name
+app.get('/db/:cloudinary_ID', async (req: Request, res: Response) => {
+    const id = req.params.cloudinary_ID
     const file = await prisma.recording.findFirst({
-        where: { name: fileName }
+        where: { cloudinaryID: id }
     })
+    res.send(file)
 })
 
-app.delete('/:file_name', async (req: Request, res: Response) => {
+app.delete('/db/:file_name', async (req: Request, res: Response) => {
     const fileName = req.params.file_name
     const id = await prisma.recording.findFirst({
         where: { name: fileName }
@@ -104,14 +99,41 @@ app.get('/openai/transcribe', async (req: Request, res: Response) => {
     const model: string = 'whisper-1'
     const prompt: string = 'The transcript is from a customer calling a moving company with a salesman named Dave.'
 
-    const filePath = path.join(__dirname, "/recordings/2022_08_03_10_19AM.mp3")
+    const filePath = path.join(__dirname, "./recordings/file.mp3")
 
-    const response = await openai.createTranscription(
-        fs.createReadStream(filePath) as any,
-        "whisper-1"
-    );
-    transcription = response.data.text
-    res.send(response.data.text)
+    let fileURL = await axios.get('http://127.0.0.1:8080/db/lnsbxgb0xhpuqrjivzq4')
+    fileURL = fileURL.data.cloudinaryURL
+
+    // await request(fileURL).pipe(fs.createWriteStream(filePath))
+
+    await request
+        .get(fileURL)
+        .on('error', (err: Error) => {
+            console.log(err)
+        })
+        .pipe(fs.createWriteStream(filePath))
+
+    try {
+        const response = await openai.createTranscription(
+            fs.createReadStream(filePath) as any,
+            model
+        );
+
+        transcription = response.data.text
+        res.send(response.data.text)
+
+    } catch (error) {
+        console.log('ERROR IS:', error)
+    }
+
+    // const filePath = path.join(__dirname, "/recordings/2022_08_03_10_19AM.mp3")
+
+    // const response = await openai.createTranscription(
+    //     fs.createReadStream(filePath) as any,
+    //     model
+    // );
+    // transcription = response.data.text
+    // res.send(response.data.text)
 })
 
 app.get('/openai/analyze', async (req: Request, res: Response) => {
